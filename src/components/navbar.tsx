@@ -31,7 +31,9 @@ export default async function Navbar() {
                     height={40}
                     className='rounded-full'
                 />
-                <p className='text-md'>Rocket Education of Science & Technology</p>
+                <p className='text-md w-44 sm:w-full'>
+                    Rocket Education of Science & Technology
+                </p>
             </div>
             <div className="flex gap-2">
                 <ModeToggle />
