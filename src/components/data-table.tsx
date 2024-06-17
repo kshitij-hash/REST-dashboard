@@ -23,17 +23,20 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import DownloadSheet from "./downloadSheet"
-import { Trash2} from "lucide-react"
+import DeleteDialog from "./deleteDialog"
+import EditDialog from "./editDialog"
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends { id: string }, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
+    handleFormSubmit: () => void
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends { id: string }, TValue>({
     columns,
     data,
-}: DataTableProps<TData, TValue>) {
+    handleFormSubmit
+}: DataTableProps<TData, TValue> ) {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const table = useReactTable({
         data,
@@ -92,6 +95,12 @@ export function DataTable<TData, TValue>({
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
+                                    <TableCell className="w-1">
+                                        <EditDialog handleFormSubmit={handleFormSubmit} id={row.original.id} />
+                                    </TableCell>
+                                    <TableCell className="w-1">
+                                        <DeleteDialog handleFormSubmit={handleFormSubmit} id={row.original.id} />
+                                    </TableCell>
                                 </TableRow>
                             ))
                         ) : (

@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider"
 import Navbar from "@/components/navbar";
+import { Separator } from "@/components/ui/separator";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,6 +27,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Navbar />
+          <Separator />
           <main>{children}</main>
         </ThemeProvider>
         <Toaster />

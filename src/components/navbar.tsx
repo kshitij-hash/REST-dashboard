@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { logout } from '../app/login/actions'
 import { createClient } from "@/utils/supabase/server"
 import { ModeToggle } from "./toggleTheme"
+import Link from "next/link"
 
 export default async function Navbar() {
     const supabase = createClient();
@@ -23,18 +24,20 @@ export default async function Navbar() {
 
     return (
         <nav className='flex justify-between items-center gap-2 p-4'>
-            <div className='flex items-center gap-2'>
-                <Image
-                    src={logo}
-                    alt='Rocket Education'
-                    width={40}
-                    height={40}
-                    className='rounded-full'
-                />
-                <p className='text-md w-44 sm:w-full'>
-                    Rocket Education of Science & Technology
-                </p>
-            </div>
+            <Link href='/'>
+                <div className='flex items-center gap-2'>
+                    <Image
+                        src={logo}
+                        alt='Rocket Education'
+                        width={40}
+                        height={40}
+                        className='rounded-full'
+                    />
+                    <p className='text-md font-semibold w-44 sm:w-full'>
+                        Rocket Education of Science & Technology
+                    </p>
+                </div>
+            </Link>
             <div className="flex gap-2">
                 <ModeToggle />
                 {data?.user ? (

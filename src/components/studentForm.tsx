@@ -27,8 +27,32 @@ import { useToast } from "./ui/use-toast";
 import { createClient } from "@/utils/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { useState } from "react";
+import { Checkbox } from "./ui/checkbox";
 
 const phoneRegex = /^[6-9]\d{9}$/;
+
+const subjects = [
+    {
+        id: 'Science',
+        label: 'Science'
+    },
+    {
+        id: 'Mathematics',
+        label: 'Mathematics'
+    },
+    {
+        id: 'Physics',
+        label: 'Physics'
+    },
+    {
+        id: 'Chemistry',
+        label: 'Chemistry'
+    },
+    {
+        id: 'Biology',
+        label: 'Biology'
+    }
+]
 
 const FormSchema = z.object({
     name: z.string({
@@ -36,6 +60,9 @@ const FormSchema = z.object({
     }),
     class: z.string({
         required_error: "Class is required",
+    }),
+    subjects: z.array(z.string()).refine((value) => value.some((subject) => subject), {
+        message: "At least one subject is required",
     }),
     phone: z.string({
         required_error: "Phone number is required."
@@ -61,6 +88,9 @@ export default function StudentForm({ onClose, handleFormSubmit }: StudentFormPr
     const [loading, setLoading] = useState(false);
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
+        defaultValues: {
+            subjects: ["Science"]
+        }
     })
     const { toast } = useToast();
 
@@ -77,28 +107,40 @@ export default function StudentForm({ onClose, handleFormSubmit }: StudentFormPr
                 })
             }
             const userId = userData?.user?.id;
+
+            let subjectsString = ''
+            data.subjects.forEach((subject) => {
+                if(subjectsString === '') {
+                    subjectsString = subject
+                } else {
+                    subjectsString += `, ${subject}`
+                }
+            })
+
             const studentData = {
                 name: data.name,
                 class: data.class,
+                subjects: subjectsString,
                 phone: data.phone,
                 whatsapp: data.whatsapp,
                 date: format(data.date_of_joining, "yyyy-MM-dd"),
                 user_id: userId
             };
             const { error: studentError } = await supabase.from('Students').insert(studentData);
-            if (studentError) {
+            if (studentError?.message) {
                 toast({
                     title: "Failed to add student",
                     description: studentError.message,
                     variant: "destructive"
                 })
+            } else {
+                toast({
+                    title: "Student added successfully",
+                    description: "The student has been added successfully",
+                })
             }
             onClose();
-            handleFormSubmit();
-            toast({
-                title: "Student added successfully",
-                description: "The student has been added successfully",
-            })
+            handleFormSubmit()
         } catch (error) {
             const errorMessage = (error as Error).message ?? "An unknown error occurred";
             toast({
@@ -133,15 +175,15 @@ export default function StudentForm({ onClose, handleFormSubmit }: StudentFormPr
                     render={({ field }) => (
                         <FormItem className="flex flex-col">
                             <FormLabel>Class</FormLabel>
-                            <Select 
-                                onValueChange={field.onChange} 
+                            <Select
+                                onValueChange={field.onChange}
                                 defaultValue={field.value}
                                 disabled={loading}
                             >
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue 
-                                        placeholder="Select a class" 
+                                        <SelectValue
+                                            placeholder="Select a class"
                                         />
                                     </SelectTrigger>
                                 </FormControl>
@@ -166,34 +208,80 @@ export default function StudentForm({ onClose, handleFormSubmit }: StudentFormPr
                 />
                 <FormField
                     control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                            <FormLabel>Phone number</FormLabel>
-                            <Input
-                                {...field}
-                                placeholder="Enter phone number"
-                                disabled={loading}
-                            />
-                            <FormMessage />
+                    name="subjects"
+                    render={() => (
+                        <FormItem>
+                            <FormLabel>Subjects</FormLabel>
+                            <div className="grid grid-cols-2 gap-4">
+                                {subjects.map((subject) => (
+                                    <FormField
+                                        key={subject.id}
+                                        control={form.control}
+                                        name="subjects"
+                                        render={({ field }) => {
+                                            return (
+                                                <FormItem
+                                                    key={subject.id}
+                                                    className="flex flex-row items-start space-x-3 space-y-0"
+                                                >
+                                                    <FormControl>
+                                                        <Checkbox
+                                                            checked={field.value?.includes(subject.id)}
+                                                            onCheckedChange={(checked) => {
+                                                                return checked
+                                                                    ? field.onChange([...field.value, subject.id])
+                                                                    : field.onChange(
+                                                                        field.value?.filter(
+                                                                            (value) => value !== subject.id
+                                                                        )
+                                                                    )
+                                                            }}
+                                                        />
+                                                    </FormControl>
+                                                    <FormLabel className="text-sm font-normal">
+                                                        {subject.label}
+                                                    </FormLabel>
+                                                </FormItem>
+                                            )
+                                        }}
+                                    />
+                                ))}
+                            </div>
                         </FormItem>
                     )}
                 />
-                <FormField
-                    control={form.control}
-                    name="whatsapp"
-                    render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                            <FormLabel>Whatsapp number</FormLabel>
-                            <Input
-                                {...field}
-                                placeholder="Enter whatsapp number"
-                                disabled={loading}
-                            />
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                <div className="flex gap-4">
+                    <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                                <FormLabel>Phone number</FormLabel>
+                                <Input
+                                    {...field}
+                                    placeholder="Enter phone number"
+                                    disabled={loading}
+                                />
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="whatsapp"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                                <FormLabel>Whatsapp number</FormLabel>
+                                <Input
+                                    {...field}
+                                    placeholder="Enter whatsapp number"
+                                    disabled={loading}
+                                />
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
                 <FormField
                     control={form.control}
                     name="date_of_joining"
@@ -239,7 +327,7 @@ export default function StudentForm({ onClose, handleFormSubmit }: StudentFormPr
                 <Button className="w-full" type="submit" disabled={loading}>
                     {loading ? "Adding student..." : "Add student"}
                 </Button>
-            </form>
-        </Form>
+            </form >
+        </Form >
     )
 }

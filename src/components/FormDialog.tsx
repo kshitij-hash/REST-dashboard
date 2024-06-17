@@ -30,7 +30,7 @@ export default function FormDialog({
                     Add new student
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[450px]">
                 <DialogHeader>
                     <DialogTitle>
                         Add new student

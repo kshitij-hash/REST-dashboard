@@ -24,7 +24,7 @@ export default function StudentDetails() {
     return (
         <div className="container mx-auto">
             <FormDialog handleFormSubmit={handleFormSubmit} />
-            <DataTable columns={columns} data={data}/>
+            <DataTable columns={columns} data={data} handleFormSubmit={handleFormSubmit}/>
         </div>
     )
 }
